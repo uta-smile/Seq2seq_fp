@@ -1,0 +1,25 @@
+local job_tmpl = import "job.libsm";
+local path_join(x, y) = "%s%s%s" % [x, if std.endsWith(x, "/") then "" else "/", y];
+local drug_train_tmpl = job_tmpl {
+    vars: {
+        assert std.length(self.train_base) > 0 : "You must specify train_base folder.",
+        assert std.length(self.data_path) > 0 : "You must specify the data path.",
+        train_base: "",
+        data_path: ""
+    },
+    dataset_spec: {},
+    data_hparams: {},
+    hparams: {},
+    name: "drug_noname_train_job",
+    args: {
+        train_dir: path_join($.vars.train_base, $.name),
+        dataset_spec: "'%s'" % std.toString($.dataset_spec),
+        hparams: "'%s'" % std.toString($.hparams),
+        data_hparams: "'%s'" % std.toString($.data_hparams)
+    },
+    // Old-style smilectl requirement specification.
+    image: "utasmile/tensorflow-drug-gpu:latest",
+    gpus: 1,
+    binary: "python ~/github/nih_drug/models/seq2seq_discovery/train.py"
+};
+drug_train_tmpl
